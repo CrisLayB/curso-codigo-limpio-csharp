@@ -1,110 +1,120 @@
-﻿using System;
-using System.Collections.Generic;
+﻿List<string> TaskList = new List<string>();
 
-namespace ToDo
+int menuSelected = 0;
+do 
 {
-    internal class Program
+    menuSelected = ShowMainMenu();
+    if ((Menu)menuSelected == Menu.Add)
     {
-        public static List<string> TL { get; set; }
-
-        static void Main(string[] args)
-        {
-            TL = new List<string>();
-            int variable = 0;
-            do
-            {
-                variable = ShowMainMenu();
-                if (variable == 1)
-                {
-                    ShowMenuAdd();
-                }
-                else if (variable == 2)
-                {
-                    ShowMenuDos();
-                }
-                else if (variable == 3)
-                {
-                    ShowMenuTres();
-                }
-            } while (variable != 4);
-        }
-        /// <summary>
-        /// Show the main menu 
-        /// </summary>
-        /// <returns>Returns option indicated by user</returns>
-        public static int ShowMainMenu()
-        {
-            Console.WriteLine("----------------------------------------");
-            Console.WriteLine("Ingrese la opción a realizar: ");
-            Console.WriteLine("1. Nueva tarea");
-            Console.WriteLine("2. Remover tarea");
-            Console.WriteLine("3. Tareas pendientes");
-            Console.WriteLine("4. Salir");
-
-            // Read line
-            string line = Console.ReadLine();
-            return Convert.ToInt32(line);
-        }
-
-        public static void ShowMenuDos()
-        {
-            try
-            {
-                Console.WriteLine("Ingrese el número de la tarea a remover: ");
-                // Show current taks
-                for (int i = 0; i < TL.Count; i++)
-                {
-                    Console.WriteLine((i + 1) + ". " + TL[i]);
-                }
-                Console.WriteLine("----------------------------------------");
-
-                string line = Console.ReadLine();
-                // Remove one position
-                int indexToRemove = Convert.ToInt32(line) - 1;
-                if (indexToRemove > -1)
-                {
-                    if (TL.Count > 0)
-                    {
-                        string task = TL[indexToRemove];
-                        TL.RemoveAt(indexToRemove);
-                        Console.WriteLine("Tarea " + task + " eliminada");
-                    }
-                }
-            }
-            catch (Exception)
-            {
-            }
-        }
-
-        public static void ShowMenuAdd()
-        {
-            try
-            {
-                Console.WriteLine("Ingrese el nombre de la tarea: ");
-                string task = Console.ReadLine();
-                TL.Add(task);
-                Console.WriteLine("Tarea registrada");
-            }
-            catch (Exception)
-            {
-            }
-        }
-
-        public static void ShowMenuTres()
-        {
-            if (TL == null || TL.Count == 0)
-            {
-                Console.WriteLine("No hay tareas por realizar");
-            } 
-            else
-            {
-                Console.WriteLine("----------------------------------------");
-                for (int i = 0; i < TL.Count; i++)
-                {
-                    Console.WriteLine((i + 1) + ". " + TL[i]);
-                }
-                Console.WriteLine("----------------------------------------");
-            }
-        }
+        ShowMenuAddTask();
     }
+    else if ((Menu)menuSelected == Menu.Remove)
+    {
+        ShowMenuRemoveTask();
+    }
+    else if ((Menu)menuSelected == Menu.List)
+    {
+        ShowMenuTaskList();
+    }
+} while ((Menu)menuSelected != Menu.Exit);
+
+/// <summary>
+/// Show the options for Task, 1. Nueva tarea , 2. Remover tarea, 3. Tareas pendientes , 4. Salir
+/// </summary>
+/// <returns>Returns option selected by user</returns>
+int ShowMainMenu()
+{
+    Console.WriteLine("----------------------------------------");
+    Console.WriteLine("Ingrese la opción a realizar: ");
+    Console.WriteLine("1. Nueva tarea");
+    Console.WriteLine("2. Remover tarea");
+    Console.WriteLine("3. Tareas pendientes");
+    Console.WriteLine("4. Salir");
+
+    string menuSelected = Console.ReadLine();
+    int numberMenuSelected;
+    bool isNumeric = int.TryParse(menuSelected, out numberMenuSelected);
+
+    if(!isNumeric)
+    {
+        Console.WriteLine("Letras no son validas");
+        return Convert.ToInt32(Menu.Invalid);
+    }
+    
+    return numberMenuSelected;
+}
+
+void ShowMenuRemoveTask()
+{
+    if(TaskList.Count == 0)
+    {
+        Console.WriteLine("No hay tareas pendientes para remover");
+        return;
+    }
+    
+    Console.WriteLine("Ingrese el número de la tarea a remover: ");
+    
+    ShowMenuTaskList();
+
+    string optionSelected = Console.ReadLine();
+
+    int taskSelected;
+    bool isNumeric = int.TryParse(optionSelected, out taskSelected);
+
+    if(!isNumeric)
+    {
+        Console.WriteLine("Letras no son validas");
+        return;
+    }
+    
+    // Remove one position because the array starts in 0
+    int indexToRemove = taskSelected - 1;
+
+    if(indexToRemove > (TaskList.Count - 1) || indexToRemove < 0)
+    {
+        Console.WriteLine("Numero de tarea seleccionado no es valido");
+        return;
+    }
+        
+    string task = TaskList[indexToRemove];
+    TaskList.RemoveAt(indexToRemove);
+    Console.WriteLine($"Tarea {task} eliminada");
+}
+
+void ShowMenuAddTask()
+{
+    Console.WriteLine("Ingrese el nombre de la tarea: ");
+    string task = Console.ReadLine();
+
+    if(task.Trim() == "")
+    {
+        Console.WriteLine("Nombre de tarea vacia, porfavor ingresa un nombre valido a la tarea");
+        return;
+    }
+    
+    TaskList.Add(task);
+    Console.WriteLine("Tarea registrada");
+}
+
+void ShowMenuTaskList()
+{
+    if (TaskList?.Count > 0)
+    {
+        Console.WriteLine("----------------------------------------");
+        int indexTask = 0;
+        TaskList.ForEach(task => Console.WriteLine($"{++indexTask}. {task}"));
+        Console.WriteLine("----------------------------------------");                
+        return;
+    } 
+
+    Console.WriteLine("No hay tareas por realizar");
+}
+
+public enum Menu
+{
+    Invalid = 0,
+    Add = 1,
+    Remove = 2,
+    List = 3,
+    Exit = 4,
 }
